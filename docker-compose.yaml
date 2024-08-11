@@ -1,0 +1,8 @@
+services:
+  telegram-bot-api:
+    build: .
+    command:
+      - --local
+      - --api-id="${TELEGRAM_API_ID:-}"
+      - --api-hash="${TELEGRAM_API_HASH:-}"
+      - --http-port="${PORT:-8080}"
