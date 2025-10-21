@@ -1,4 +1,4 @@
-FROM alpine:3.21.3 AS builder
+FROM alpine:3.22.2 AS builder
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ WORKDIR /app/telegram-bot-api/build
 RUN cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && \
     cmake --build . --target install
 
-FROM alpine:3.21.3
+FROM alpine:3.22.2
 
 WORKDIR /app
 
