@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.4](https://github.com/kidager/telegram-bot-api/compare/v1.0.3...v1.0.4) (2026-09-27)
+
+
+### Miscellaneous Chores
+
+* **release:** drop last-release-sha now that v1.0.3 exists ([75ea384](https://github.com/kidager/telegram-bot-api/commit/75ea3846f249dac1868046ea18f8704ffe4f58e1))
+
+
+### Continuous Integration
+
+* **build:** only build when the image inputs change ([f7eb865](https://github.com/kidager/telegram-bot-api/commit/f7eb8656c1b0945e219cb0709774c8e8399a23a0))
+* move runners to ubuntu-26.04 ([109b7e5](https://github.com/kidager/telegram-bot-api/commit/109b7e5c17f9630c4ae30ec4557daadcb082a80f))
+* **release:** pin runners to ubuntu-24.04 ([95f1128](https://github.com/kidager/telegram-bot-api/commit/95f11283105b24358f537362bdb2dd206a626484))
+* skip redundant builds, move to ubuntu-26.04, drop last-release-sha ([8f88805](https://github.com/kidager/telegram-bot-api/commit/8f88805bcb9d72866d801e7b1c51c9d1a86a24bd))
+
 ## [1.0.3](https://github.com/kidager/telegram-bot-api/compare/v1.0.2...v1.0.3) (2026-09-27)
 
 
