@@ -1,10 +1,19 @@
 name: Build
 
 on:
+  # Only when the image inputs change (release PRs only touch the changelog and version files).
   pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/build.yml
   push:
     branches:
       - main
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/build.yml
 
 permissions:
   contents: read
