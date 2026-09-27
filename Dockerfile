@@ -1,35 +1,58 @@
-FROM alpine:3.21.3 AS builder
+# syntax=docker/dockerfile:1
+# Base image is pinned by digest and bumped by dependabot (it only understands literal FROM lines).
+FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS builder
+
+# Upstream telegram-bot-api commit to build. Bump it when a new Bot API version ships.
+ARG TELEGRAM_BOT_API_REF=e3e9dd8e5b3d7ab8537cd5a10dc31d5ffa8f82d1
+
+# Packages are unpinned on purpose, the weekly CI clean build catches breakage.
+# hadolint ignore=DL3018
+RUN apk add --no-cache \
+        alpine-sdk \
+        ccache \
+        clang \
+        cmake \
+        git \
+        gperf \
+        linux-headers \
+        llvm \
+        openssl-dev \
+        zlib-dev
+
+WORKDIR /src
+
+RUN git init -q . \
+    && git remote add origin https://github.com/tdlib/telegram-bot-api.git \
+    && git fetch -q --depth 1 origin "${TELEGRAM_BOT_API_REF}" \
+    && git checkout -q FETCH_HEAD \
+    && git submodule update --init --recursive --depth 1
+
+# Compare compilers by content, so a reinstalled toolchain still hits the cache.
+ENV CCACHE_DIR=/ccache \
+    CCACHE_COMPILERCHECK=content \
+    CCACHE_MAXSIZE=1G
+
+# clang needs far less memory than GCC for tdlib.
+RUN --mount=type=cache,id=ccache,target=/ccache \
+    ccache -z && \
+    cmake -S . -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+        -DCMAKE_C_COMPILER=clang \
+        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache && \
+    cmake --build build --target install --parallel "$(nproc)" && \
+    ccache -s
+
+FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
 
 WORKDIR /app
 
-# Compile telegram-bot-api server:
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
-        alpine-sdk=1.1-r0 \
-        cmake=3.31.1-r0 \
-        git=2.47.2-r0 \
-        gperf=3.1-r4 \
-        linux-headers=6.6-r1 \
-        openssl-dev=3.3.3-r0 \
-        zlib-dev=1.3.1-r2 \
-    && git clone --recursive https://github.com/tdlib/telegram-bot-api.git
-
-WORKDIR /app/telegram-bot-api
-
-RUN rm -rf build && mkdir build
-
-WORKDIR /app/telegram-bot-api/build
-
-RUN cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && \
-    cmake --build . --target install
-
-FROM alpine:3.21.3
-
-WORKDIR /app
-
-# Install dependencies
-RUN apk add --no-cache \
-    libstdc++=14.2.0-r4 \
-    openssl=3.3.3-r0
+    libstdc++ \
+    openssl
 
 # Install telegram-bot-api server
 COPY --from=builder /usr/local/bin/telegram-bot-api /usr/local/bin/
