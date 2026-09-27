@@ -5,7 +5,7 @@ FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4c
 # Upstream telegram-bot-api commit to build. Bump it when a new Bot API version ships.
 ARG TELEGRAM_BOT_API_REF=e3e9dd8e5b3d7ab8537cd5a10dc31d5ffa8f82d1
 
-# Packages are unpinned on purpose, the weekly CI clean build catches breakage.
+# Packages are unpinned on purpose, they get refreshed with each base image bump.
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
         alpine-sdk \
