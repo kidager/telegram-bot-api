@@ -1,0 +1,71 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    # Native runner per arch, no QEMU.
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      IMAGE: telegram-bot-api:ci-${{ matrix.arch }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Restore ccache
+        id: ccache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ccache
+          key: ccache-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.arch }}-
+
+      - name: Inject ccache into the BuildKit cache mount
+        uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723 # v3.4.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            { "ccache": { "target": "/ccache", "id": "ccache" } }
+          skip-extraction: ${{ steps.ccache.outputs.cache-hit }}
+
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          load: true
+          tags: ${{ env.IMAGE }}
+          cache-from: type=gha,scope=build-${{ matrix.arch }}
+          cache-to: type=gha,scope=build-${{ matrix.arch }},mode=max
+
+      - name: Smoke test
+        run: |
+          # The server prints its version on stderr.
+          docker run --rm "$IMAGE" --version 2>&1 | tee version.txt
+          grep -q '^Bot API ' version.txt
+          docker run --rm "$IMAGE" --help > /dev/null
+          docker image ls "$IMAGE"
