@@ -1,10 +1,19 @@
 name: Build
 
 on:
+  # Only when the image inputs change (release PRs only touch the changelog and version files).
   pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/build.yml
   push:
     branches:
       - main
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/build.yml
 
 permissions:
   contents: read
@@ -23,9 +32,9 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-24.04
+            runner: ubuntu-26.04
           - arch: arm64
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-26.04-arm
     env:
       IMAGE: telegram-bot-api:ci-${{ matrix.arch }}
     steps:
