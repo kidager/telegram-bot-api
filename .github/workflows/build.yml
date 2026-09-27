@@ -71,7 +71,8 @@ jobs:
 
       - name: Smoke test
         run: |
-          docker run --rm "$IMAGE" --version | tee version.txt
+          # The server prints its version on stderr.
+          docker run --rm "$IMAGE" --version 2>&1 | tee version.txt
           grep -q '^Bot API ' version.txt
           docker run --rm "$IMAGE" --help > /dev/null
           docker image ls "$IMAGE"
