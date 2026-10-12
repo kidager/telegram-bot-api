@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/kidager/telegram-bot-api/compare/v1.0.4...v1.0.5) (2026-10-12)
+
+
+### Continuous Integration
+
+* **release:** release through kidager-bot ([1609b5b](https://github.com/kidager/telegram-bot-api/commit/1609b5ba97da3f6cd1c47a9b927a64b859d02b3b))
+
 ## [1.0.4](https://github.com/kidager/telegram-bot-api/compare/v1.0.3...v1.0.4) (2026-09-27)
 
 
