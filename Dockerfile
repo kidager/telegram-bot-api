@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Base image is pinned by digest and bumped by dependabot (it only understands literal FROM lines).
-FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS builder
+FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS builder
 
 # Upstream telegram-bot-api commit to build. Bump it when a new Bot API version ships.
 ARG TELEGRAM_BOT_API_REF=e3e9dd8e5b3d7ab8537cd5a10dc31d5ffa8f82d1
@@ -45,7 +45,7 @@ RUN --mount=type=cache,id=ccache,target=/ccache \
     cmake --build build --target install --parallel "$(nproc)" && \
     ccache -s
 
-FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
 
 WORKDIR /app
 
